@@ -11,12 +11,15 @@
           crossorigin=""/>
 
     <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js" integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
-            crossorigin="">
-    </script>
+            crossorigin=""></script>
+
+    <link rel="stylesheet" href="ionicons.min.css">
+    <link rel="stylesheet" href="leaflet.awesome-markers.css">
+    <script src="leaflet.awesome-markers.js"></script>
+
 
     <script>
         var earthquakelayer;
-
         // get earthquake data using XMLHttpRequest
         function getEarthquakes() {
             client = new XMLHttpRequest();
@@ -35,8 +38,20 @@
 
         // convert received data (text) to JSON format and add to map
         function loadEarthquakelayer(earthquakedata){
+            // convert text to json format
             var earthquakejson = JSON.parse(earthquakedata);
-            earthquakelayer = L.geoJson(earthquakejson).addTo(mymap);
+            // load the geojson layer
+            earthquakelayer = L.geoJson(earthquakejson,
+                { pointToLayer: function(feature, latlng) {
+                    if(feature.properties.mag > 1.75){
+                        return L.marker(latlng, {icon:testMarkerRed}).bindPopup("<b>"+ feature.properties.place+"</b>");
+                    }
+                    else {
+                        return L.marker(latlng, {icon:testMarkerPink}).bindPopup("<b>"+ feature.properties.place+"</b>");
+                    }
+                }
+                }
+            ).addTo(mymap);
             mymap.fitBounds(earthquakelayer.getBounds()); // change map zoom to see all data
         }
     </script>
@@ -47,6 +62,8 @@
         #mapid { height: 180px; }
     </style>
 </head>
+
+
 
 
 <body>
@@ -69,11 +86,19 @@
             getEarthquakes();
         }, false)
 
+        // colour markers
 
+        var testMarkerRed = L.AwesomeMarkers.icon({
+            icon:'play',
+            markerColor:'red'
+        });
+
+        var testMarkerPink = L.AwesomeMarkers.icon({
+            icon:'play',
+            markerColor:'pink'
+        });
 
     </script>
-
-
 
 
 </body>
