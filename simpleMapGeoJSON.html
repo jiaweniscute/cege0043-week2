@@ -18,6 +18,11 @@
     <!-- the following CSS is used to set the size of the Map -->
     <style type="text/css">
         #mapid { height: 180px; } </style>
+
+    <link rel="stylesheet" href="static/ionicons.min.css">
+    <link rel="stylesheet" href="static/leaflet.awesome-markers.css">
+    <script src="static/leaflet.awesome-markers.js"></script>
+
 </head>
 <body>
     <div id="mapid" style="width: 600px; height: 400px; "></div>
@@ -34,6 +39,12 @@
                 id: 'mapbox.streets'
             }).addTo(mymap);
 
+        // create custom icon
+        var testMarkerPink = L.AwesomeMarkers.icon({
+            icon:'play',
+            markerColor:'pink'
+        });
+
         // create a geoJSON feature
         var geojsonFeature = {
             "type": "Feature",
@@ -47,8 +58,14 @@
             }
         };
 
+
         // add geojson to the map
-        L.geoJSON(geojsonFeature).addTo(mymap).bindPopup("<b>"+geojsonFeature.properties.name+" "+geojsonFeature.properties.popupContent+"</b>");
+        L.geoJSON(geojsonFeature, {
+            pointTolayer: function(feature, latlng){
+                return L.marker(latlng, {icon:testMarkerPink});
+            }
+        }).addTo(mymap).bindPopup("<b>"+geojsonFeature.properties.name +
+            " "+geojsonFeature.properties.popupContent+"</b>");
 
 
         // create custom popup
@@ -65,12 +82,7 @@
         // add event detector to the map
         mymap.on('click',onMapClick);
 
-
-
     </script>
-
-
-
 
 </body>
 </html>
