@@ -22,8 +22,13 @@
 
         function loadEarthquakeData(){
             getEarthquakes()
-            console.log('earthquake data updated')
+            console.log('earthquake data updated');
 
+        }
+
+        function removeEarthquakeData(){
+            console.log('earthquake data removed');
+            mymap.removeLayer(earthquakelayer);
         }
 
         var client;
@@ -73,7 +78,6 @@
 
 
 
-
 <body>
     <div id="mapid" style="width: 600px; height: 400px; ">
 
@@ -111,7 +115,7 @@
     </div>
 
     <button id = "loadData" name = "loadData" onclick ="loadEarthquakeData()">Click here to load the data</button>
-
+    <button id = "removeEarthquakeData" name="removeEarthquakeData" onclick="removeEarthquakeData()">Click here to remove Earthquake data</button>
 
 </body>
 </html>
