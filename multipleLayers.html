@@ -17,55 +17,83 @@
     <link rel="stylesheet" href="leaflet.awesome-markers.css">
     <script src="leaflet.awesome-markers.js"></script>
 
-
     <script>
 
-        function loadEarthquakeData(){
-            getEarthquakes()
-            console.log('earthquake data updated');
+        function loadData(layername){
+            getData(layername);
+            console.log(layername + "data has been added to the map");
 
         }
 
-        function removeEarthquakeData(){
-            console.log('earthquake data removed');
-            mymap.removeLayer(earthquakelayer);
+        function removeData(layername){
+            var layer
+            if (layername == "earthquakes"){
+                layer = earthquakelayer;
+            }
+            if (layername == "busstops"){
+                layer = busstoplayer;
+            }
+            mymap.removeLayer(layer);
+            console.log(layername + 'data has been removed');
+
         }
 
         var client;
         var earthquakelayer;
-        // get earthquake data using XMLHttpRequest
-        function getEarthquakes() {
+        var busstoplayer;
+
+        function getData(layername){
             client = new XMLHttpRequest();
-            client.open('GET', 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson');
-            client.onreadystatechange = earthquakeResponse;
+            var url;
+            if (layername =="earthquakes"){
+                url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson";
+            }
+            if (layername =='busstops'){
+                url = 'https://developer.cege.ucl.ac.uk:31097/cege0043-week2/busstops.geojson';
+            }
+
+            client.open('GET', url);
+            client.onreadystatechange = dataResponse;
             client.send();
+            console.log('retrieved data')
+
         }
 
         // wait for response from data server, process response once it is received
-        function earthquakeResponse() {
+        function dataResponse() {
             if (client.readyState == 4) {
-                var earthquakedata = client.responseText;
-                loadEarthquakelayer(earthquakedata);
+                console.log('client readystate = 4')
+                var geoJSONData = client.responseText;
+                console.log(geoJSONData)
+                loadLayer(geoJSONData);
+                console.log('called loadlayer function')
             }
+            console.log('loading layer')
+
         }
 
         // convert received data (text) to JSON format and add to map
-        function loadEarthquakelayer(earthquakedata){
+        function loadLayer(geoJSONData){
+            if (geoJSONData.indexOf("earthquake")>0){
+                var loadingEarthquakes = true;
+            }
+            if (geoJSONData.indexOf('IIT_METHOD')>0){
+                var loadingBusstops = true;
+            }
             // convert text to json format
-            var earthquakejson = JSON.parse(earthquakedata);
+            var json = JSON.parse(geoJSONData);
             // load the geojson layer
-            earthquakelayer = L.geoJson(earthquakejson,
-                { pointToLayer: function(feature, latlng) {
-                    if(feature.properties.mag > 1.75){
-                        return L.marker(latlng, {icon:testMarkerRed}).bindPopup("<b>"+ feature.properties.place+"</b>");
-                    }
-                    else {
-                        return L.marker(latlng, {icon:testMarkerPink}).bindPopup("<b>"+ feature.properties.place+"</b>");
-                    }
-                }
-                }
-            ).addTo(mymap);
-            mymap.fitBounds(earthquakelayer.getBounds()); // change map zoom to see all data
+            if (loadingEarthquakes === true){
+                earthquakelayer = L.geoJson(json).addTo(mymap);
+                mymap.fitBounds(earthquakelayer.getBounds());
+            }
+
+            if (loadingBusstops === true){
+                busstoplayer = L.geoJson(json).addTo(mymap);
+                mymap.fitBounds(busstoplayer.getBounds());
+            }
+            console.log('converting text to json format and adding to map')
+
         }
     </script>
 
@@ -74,6 +102,7 @@
     <style type="text/css">
         #mapid { height: 180px; }
     </style>
+
 </head>
 
 
@@ -93,29 +122,14 @@
                     id: 'mapbox.streets'
                 }).addTo(mymap);
 
-            // load map data only after page has loaded
-            document.addEventListener('DOMContentLoaded', function(){
-                getEarthquakes();
-            }, false)
-
-            // colour markers
-
-            var testMarkerRed = L.AwesomeMarkers.icon({
-                icon:'play',
-                markerColor:'red'
-            });
-
-            var testMarkerPink = L.AwesomeMarkers.icon({
-                icon:'play',
-                markerColor:'pink'
-            });
-
         </script>
 
     </div>
 
-    <button id = "loadData" name = "loadData" onclick ="loadEarthquakeData()">Click here to load the data</button>
-    <button id = "removeEarthquakeData" name="removeEarthquakeData" onclick="removeEarthquakeData()">Click here to remove Earthquake data</button>
+    <button id = "loadEarthquakeData" name = "loadEarthquakeData" onclick ="loadData('earthquakes')">Click here to load earthquake data</button>
+    <button id = "removeEarthquakeData" name="removeEarthquakeData" onclick="removeData('earthquakes')">Click here to remove Earthquake data</button>
+    <button id = "loadBusstopData" name="loadBusstopData" onclick="loadData('busstops')">Click here to load bus stop data</button>
+    <button id = "removeBusstopData" name="removeBusstopData" onclick="removeData('busstops')">Click here to remove bus stop data</button>
 
 </body>
 </html>
