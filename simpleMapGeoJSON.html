@@ -51,6 +51,20 @@
         L.geoJSON(geojsonFeature).addTo(mymap).bindPopup("<b>"+geojsonFeature.properties.name+" "+geojsonFeature.properties.popupContent+"</b>");
 
 
+        // create custom popup
+        var popup = L.popup()
+
+        // create an event detector
+        function onMapClick(e){
+            popup
+                .setLatLng(e.latlng)
+                .setContent("You Clicked the map at" + e.latlng.toString())
+                .openOn(mymap);
+        }
+
+        // add event detector to the map
+        mymap.on('click',onMapClick);
+
 
 
     </script>
